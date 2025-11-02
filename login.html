@@ -9,28 +9,44 @@
 <body>
     <div class="login-container">
         <div class="card login-form">
-            <h2>Entrar na Loja</h2>
+            <div class="login-header">
+                <h2>🔐 Entrar na Loja</h2>
+                <p>Bem-vindo de volta!</p>
+            </div>
+            
             <form id="login-form">
                 <div class="form-group">
-                    <label for="username">Nome de usuário</label>
-                    <input type="text" id="username" class="form-control" required>
+                    <label for="username">👤 Nome de usuário</label>
+                    <input type="text" id="username" class="form-control" required placeholder="Digite seu usuário">
                 </div>
+                
                 <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" class="form-control" required>
+                    <label for="password">🔒 Senha</label>
+                    <input type="password" id="password" class="form-control" required placeholder="Digite sua senha">
                 </div>
-                <div class="biometric-option">
-                    <input type="checkbox" id="biometric-login">
-                    <label for="biometric-login">Usar autenticação biométrica</label>
+                
+                <div class="form-options">
+                    <div class="biometric-option">
+                        <input type="checkbox" id="biometric-login">
+                        <label for="biometric-login">📱 Usar autenticação biométrica</label>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+                
+                <button type="submit" class="btn btn-primary login-btn">
+                    🚀 Entrar na Loja
+                </button>
             </form>
-            <p style="text-align: center; margin-top: 15px;">
-                Não tem uma conta? <a href="#" id="register-link">Registre-se</a>
-            </p>
+            
+            <div class="login-footer">
+                <p>É novo por aqui? <a href="#" id="register-link">Crie sua conta</a></p>
+                <p class="admin-link">
+                    <a href="admin.html" id="admin-access">🔧 Acesso Administrativo</a>
+                </p>
+            </div>
         </div>
     </div>
 
+    <script src="init-db.js"></script>
     <script src="webrtc-config.js"></script>
     <script src="auth-system.js"></script>
     <script src="login-script.js"></script>

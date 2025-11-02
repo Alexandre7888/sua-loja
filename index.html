@@ -10,11 +10,12 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">Minha Loja</div>
+                <div class="logo">🛍️ Minha Loja</div>
                 <nav>
                     <ul>
                         <li><a href="#" id="nav-home">Início</a></li>
                         <li><a href="#" id="nav-products">Produtos</a></li>
+                        <li><a href="#" id="nav-cart">Carrinho (<span id="cart-count">0</span>)</a></li>
                     </ul>
                 </nav>
                 <div class="auth-buttons">
@@ -27,15 +28,36 @@
     <main>
         <section id="dashboard" class="dashboard container">
             <div class="dashboard-header">
-                <h1 class="dashboard-title">Nossos Produtos</h1>
+                <h1 class="dashboard-title">🎯 Nossos Produtos</h1>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="🔍 Buscar produtos..." class="form-control">
+                </div>
             </div>
             
             <div class="products-grid" id="products-container">
                 <!-- Produtos carregados via JavaScript -->
             </div>
         </section>
+
+        <!-- Carrinho de Compras -->
+        <div id="cart-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🛒 Seu Carrinho</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="cart-items"></div>
+                    <div class="cart-total">
+                        <strong>Total: R$ <span id="cart-total">0.00</span></strong>
+                    </div>
+                    <button id="checkout-btn" class="btn btn-primary">Finalizar Compra</button>
+                </div>
+            </div>
+        </div>
     </main>
 
+    <script src="init-db.js"></script>
     <script src="webrtc-config.js"></script>
     <script src="auth-system.js"></script>
     <script src="store-main.js"></script>

@@ -10,69 +10,149 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">Painel Admin</div>
+                <div class="logo">⚙️ Painel Admin</div>
                 <nav>
                     <ul>
-                        <li><a href="#" data-tab="products">Produtos</a></li>
-                        <li><a href="#" data-tab="users">Usuários</a></li>
-                        <li><a href="#" data-tab="settings">Configurações</a></li>
+                        <li><a href="#" data-tab="products">📦 Produtos</a></li>
+                        <li><a href="#" data-tab="users">👥 Usuários</a></li>
+                        <li><a href="#" data-tab="orders">📋 Pedidos</a></li>
+                        <li><a href="#" data-tab="settings">⚙️ Configurações</a></li>
                     </ul>
                 </nav>
                 <div class="auth-buttons">
-                    <button id="admin-logout" class="btn btn-outline">Sair</button>
+                    <button id="admin-logout" class="btn btn-outline">🚪 Sair</button>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="admin-panel container">
+        <!-- Tab Produtos -->
         <div class="admin-content active" id="products-tab">
             <div class="card">
-                <h3>Gerenciar Produtos</h3>
-                <button id="add-product-btn" class="btn btn-primary">Adicionar Produto</button>
+                <div class="card-header">
+                    <h3>📦 Gerenciar Produtos</h3>
+                    <button id="add-product-btn" class="btn btn-primary">+ Adicionar Produto</button>
+                </div>
                 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Preço</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-products-list"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Preço</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-products-list"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
+        <!-- Tab Usuários -->
         <div class="admin-content" id="users-tab">
             <div class="card">
-                <h3>Usuários Registrados</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Dispositivo</th>
-                            <th>Localização</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-list"></tbody>
-                </table>
+                <h3>👥 Usuários Registrados</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Dispositivo</th>
+                                <th>Último Login</th>
+                                <th>Localização</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-list"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
+        <!-- Tab Pedidos -->
+        <div class="admin-content" id="orders-tab">
+            <div class="card">
+                <h3>📋 Pedidos Realizados</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID Pedido</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Configurações -->
         <div class="admin-content" id="settings-tab">
             <div class="card">
-                <h3>Configurações de Pagamento</h3>
+                <h3>⚙️ Configurações de Pagamento</h3>
                 <div class="form-group">
-                    <label for="payment-url">URL de Pagamento</label>
-                    <input type="text" id="payment-url" class="form-control">
+                    <label for="payment-url">🔗 URL de Pagamento</label>
+                    <input type="text" id="payment-url" class="form-control" placeholder="https://sualoja.com/pagamento">
                 </div>
-                <button id="save-payment-settings" class="btn btn-primary">Salvar</button>
+                
+                <div class="form-group">
+                    <label for="store-name">🏪 Nome da Loja</label>
+                    <input type="text" id="store-name" class="form-control" placeholder="Minha Loja Online">
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin-password">🔑 Senha de Administrador</label>
+                    <input type="password" id="admin-password" class="form-control" placeholder="Alterar senha admin">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enable-biometric"> 📱 Habilitar autenticação biométrica
+                    </label>
+                </div>
+                
+                <button id="save-settings" class="btn btn-primary">💾 Salvar Configurações</button>
             </div>
         </div>
     </main>
 
+    <!-- Modal Adicionar/Editar Produto -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="product-modal-title">Adicionar Produto</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label for="product-name">Nome do Produto</label>
+                        <input type="text" id="product-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Preço (R$)</label>
+                        <input type="number" id="product-price" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Descrição</label>
+                        <textarea id="product-description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Produto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="init-db.js"></script>
     <script src="webrtc-config.js"></script>
     <script src="auth-system.js"></script>
     <script src="admin-script.js"></script>

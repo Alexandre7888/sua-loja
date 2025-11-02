@@ -1,4 +1,4 @@
-// Sistema de Autenticação com WebAuthn
+// Sistema de Autenticação com WebAuthn - CORRIGIDO
 class AuthSystem {
     constructor() {
         this.currentUser = null;
@@ -6,19 +6,28 @@ class AuthSystem {
         this.checkAuthStatus();
     }
 
-    // Verificar status de autenticação
+    // Verificar status de autenticação - CORRIGIDO
     checkAuthStatus() {
         const userData = localStorage.getItem('currentUser');
-        const adminAuth = localStorage.getItem('adminAuthenticated');
         
-        if (userData) {
-            this.currentUser = JSON.parse(userData);
-            this.redirectToApp();
-        } else {
+        // Se não tem usuário logado E está na página principal, redireciona para login
+        if (!userData && window.location.pathname.endsWith('index.html')) {
             this.redirectToLogin();
+            return;
+        }
+        
+        // Se tem usuário logado E está na página de login, redireciona para principal
+        if (userData && window.location.pathname.endsWith('login.html')) {
+            this.redirectToApp();
+            return;
         }
 
-        this.isAdmin = adminAuth === 'true';
+        if (userData) {
+            this.currentUser = JSON.parse(userData);
+        }
+
+        // Verificar admin
+        this.isAdmin = localStorage.getItem('adminAuthenticated') === 'true';
     }
 
     // Redirecionar para o aplicativo principal
@@ -36,59 +45,79 @@ class AuthSystem {
         }
     }
 
-    // Registrar novo usuário
+    // Registrar novo usuário - CORRIGIDO
     async registerUser(username, password, useBiometric = false) {
         try {
+            // Verificar se usuário já existe
+            const users = JSON.parse(localStorage.getItem('storeUsers') || '[]');
+            const userExists = users.find(u => u.username === username);
+            
+            if (userExists) {
+                throw new Error('Usuário já existe!');
+            }
+
             const userData = {
                 id: this.generateId(),
                 username: username,
-                password: this.hashPassword(password),
-                device: navigator.userAgent,
+                password: this.hashPassword(password), // Em produção use bcrypt
+                device: this.getDeviceInfo(),
                 createdAt: new Date().toISOString(),
-                location: null
+                lastLogin: null,
+                location: null,
+                biometricEnabled: useBiometric
             };
 
-            if (useBiometric) {
-                await this.registerBiometricCredential(userData.id);
+            // Tentar registrar biometria se solicitado
+            if (useBiometric && this.supportsBiometric()) {
+                try {
+                    await this.registerBiometricCredential(userData.id);
+                    userData.biometricRegistered = true;
+                } catch (bioError) {
+                    console.warn('Biometria não configurada:', bioError);
+                    userData.biometricRegistered = false;
+                }
             }
 
             // Salvar usuário
-            const users = JSON.parse(localStorage.getItem('storeUsers') || '[]');
             users.push(userData);
             localStorage.setItem('storeUsers', JSON.stringify(users));
 
             // Fazer login automaticamente
-            await this.loginUser(username, password, useBiometric);
-
-            return { success: true, user: userData };
+            return await this.loginUser(username, password, useBiometric);
 
         } catch (error) {
             console.error('Erro no registro:', error);
+            this.showNotification('❌ ' + error.message, 'error');
             return { success: false, error: error.message };
         }
     }
 
-    // Login de usuário
+    // Login de usuário - CORRIGIDO
     async loginUser(username, password, useBiometric = false) {
         try {
             const users = JSON.parse(localStorage.getItem('storeUsers') || '[]');
             const user = users.find(u => u.username === username);
 
             if (!user) {
-                throw new Error('Usuário não encontrado');
+                throw new Error('Usuário não encontrado!');
             }
 
+            // Verificar método de autenticação
             if (useBiometric) {
+                if (!user.biometricRegistered) {
+                    throw new Error('Biometria não configurada para este usuário');
+                }
                 await this.authenticateBiometric();
             } else {
+                // Verificar senha
                 if (user.password !== this.hashPassword(password)) {
-                    throw new Error('Senha incorreta');
+                    throw new Error('Senha incorreta!');
                 }
             }
 
             // Atualizar dados do usuário
             user.lastLogin = new Date().toISOString();
-            user.device = navigator.userAgent;
+            user.device = this.getDeviceInfo();
             
             // Salvar usuário atual
             this.currentUser = user;
@@ -98,18 +127,25 @@ class AuthSystem {
             const updatedUsers = users.map(u => u.id === user.id ? user : u);
             localStorage.setItem('storeUsers', JSON.stringify(updatedUsers));
 
-            this.redirectToApp();
+            this.showNotification('✅ Login realizado com sucesso!', 'success');
+            
+            // Redirecionar após breve delay
+            setTimeout(() => {
+                this.redirectToApp();
+            }, 1000);
+
             return { success: true, user: user };
 
         } catch (error) {
             console.error('Erro no login:', error);
+            this.showNotification('❌ ' + error.message, 'error');
             return { success: false, error: error.message };
         }
     }
 
     // Registrar credencial biométrica
     async registerBiometricCredential(userId) {
-        if (!window.PublicKeyCredential) {
+        if (!this.supportsBiometric()) {
             throw new Error('Navegador não suporta autenticação biométrica');
         }
 
@@ -124,7 +160,10 @@ class AuthSystem {
                 name: userId,
                 displayName: userId,
             },
-            pubKeyCredParams: [{alg: -7, type: "public-key"}],
+            pubKeyCredParams: [
+                {alg: -7, type: "public-key"},
+                {alg: -257, type: "public-key"}
+            ],
             authenticatorSelection: {
                 authenticatorAttachment: "platform",
                 userVerification: "required"
@@ -141,10 +180,16 @@ class AuthSystem {
         const credentials = JSON.parse(localStorage.getItem('biometricCredentials') || '{}');
         credentials[userId] = credential;
         localStorage.setItem('biometricCredentials', JSON.stringify(credentials));
+
+        return credential;
     }
 
     // Autenticar com biometria
     async authenticateBiometric() {
+        if (!this.supportsBiometric()) {
+            throw new Error('Biometria não suportada');
+        }
+
         const publicKeyCredentialRequestOptions = {
             challenge: new Uint8Array(32),
             allowCredentials: [],
@@ -156,19 +201,45 @@ class AuthSystem {
             publicKey: publicKeyCredentialRequestOptions
         });
 
-        return assertion !== null;
+        if (!assertion) {
+            throw new Error('Autenticação biométrica falhou');
+        }
+
+        return assertion;
     }
 
-    // Login administrativo
+    // Login administrativo - CORRIGIDO
     adminLogin(password) {
         const adminPassword = localStorage.getItem('adminPassword') || 'admin123';
         
         if (password === adminPassword) {
             localStorage.setItem('adminAuthenticated', 'true');
             this.isAdmin = true;
+            this.showNotification('✅ Acesso administrativo concedido!', 'success');
+            
+            // Redirecionar para admin após login
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1000);
+            
             return true;
+        } else {
+            this.showNotification('❌ Senha administrativa incorreta!', 'error');
+            return false;
         }
-        return false;
+    }
+
+    // Verificar autenticação admin
+    checkAdminAuth() {
+        const isAdmin = localStorage.getItem('adminAuthenticated') === 'true';
+        if (!isAdmin && window.location.pathname.includes('admin.html')) {
+            const password = prompt('🔐 Senha de administrador:');
+            if (!password || !this.adminLogin(password)) {
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+        return true;
     }
 
     // Logout
@@ -177,17 +248,88 @@ class AuthSystem {
         this.isAdmin = false;
         localStorage.removeItem('currentUser');
         localStorage.removeItem('adminAuthenticated');
-        window.location.href = 'login.html';
+        this.showNotification('👋 Logout realizado com sucesso!', 'info');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
+    }
+
+    // Admin logout
+    adminLogout() {
+        localStorage.removeItem('adminAuthenticated');
+        this.showNotification('👋 Logout administrativo realizado!', 'info');
+        
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
     }
 
     // Utilitários
+    supportsBiometric() {
+        return window.PublicKeyCredential && 
+               PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+               PublicKeyCredential.isConditionalMediationAvailable;
+    }
+
+    getDeviceInfo() {
+        return {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            cookiesEnabled: navigator.cookieEnabled
+        };
+    }
+
     generateId() {
-        return Math.random().toString(36).substr(2, 9);
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
     hashPassword(password) {
-        // Hash simples - em produção use bcrypt
-        return btoa(password);
+        // Hash simples - EM PRODUÇÃO USE BCRYPT!
+        return btoa(unescape(encodeURIComponent(password)));
+    }
+
+    showNotification(message, type = 'info') {
+        // Remover notificação anterior se existir
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 10000;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remover após 5 segundos
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    // Verificar se usuário está logado
+    isLoggedIn() {
+        return this.currentUser !== null;
+    }
+
+    // Obter usuário atual
+    getCurrentUser() {
+        return this.currentUser;
     }
 }
 
