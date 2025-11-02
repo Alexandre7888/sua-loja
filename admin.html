@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Minha Loja</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Painel Admin</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" data-tab="products">Produtos</a></li>
+                        <li><a href="#" data-tab="users">Usuários</a></li>
+                        <li><a href="#" data-tab="settings">Configurações</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <button id="admin-logout" class="btn btn-outline">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-panel container">
+        <div class="admin-content active" id="products-tab">
+            <div class="card">
+                <h3>Gerenciar Produtos</h3>
+                <button id="add-product-btn" class="btn btn-primary">Adicionar Produto</button>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-products-list"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="admin-content" id="users-tab">
+            <div class="card">
+                <h3>Usuários Registrados</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Dispositivo</th>
+                            <th>Localização</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-list"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="admin-content" id="settings-tab">
+            <div class="card">
+                <h3>Configurações de Pagamento</h3>
+                <div class="form-group">
+                    <label for="payment-url">URL de Pagamento</label>
+                    <input type="text" id="payment-url" class="form-control">
+                </div>
+                <button id="save-payment-settings" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="webrtc-config.js"></script>
+    <script src="auth-system.js"></script>
+    <script src="admin-script.js"></script>
+</body>
+</html>

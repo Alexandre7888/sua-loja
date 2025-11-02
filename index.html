@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Loja Online</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Minha Loja</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" id="nav-home">Início</a></li>
+                        <li><a href="#" id="nav-products">Produtos</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <button id="logout-btn" class="btn btn-outline">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="dashboard" class="dashboard container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Nossos Produtos</h1>
+            </div>
+            
+            <div class="products-grid" id="products-container">
+                <!-- Produtos carregados via JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <script src="webrtc-config.js"></script>
+    <script src="auth-system.js"></script>
+    <script src="store-main.js"></script>
+</body>
+</html>

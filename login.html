@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Minha Loja</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="card login-form">
+            <h2>Entrar na Loja</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Nome de usuário</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <div class="biometric-option">
+                    <input type="checkbox" id="biometric-login">
+                    <label for="biometric-login">Usar autenticação biométrica</label>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+            </form>
+            <p style="text-align: center; margin-top: 15px;">
+                Não tem uma conta? <a href="#" id="register-link">Registre-se</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="webrtc-config.js"></script>
+    <script src="auth-system.js"></script>
+    <script src="login-script.js"></script>
+</body>
+</html>
